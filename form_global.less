@@ -1,0 +1,75 @@
+input, textarea, .picker, button {
+    width: 92%;  // 调整宽度更适合移动端
+    height: 88rpx;  // 使用rpx单位，更适合小程序
+    margin: 0 auto 20rpx;  // 居中对齐，增加间距
+    padding: 0 30rpx;  // 适当的内边距
+    border: 2rpx solid #EBEEF5;  // 更细腻的边框
+    border-radius: 8rpx;  // 适当的圆角
+    box-sizing: border-box;
+    font-size: 28rpx;  // 更适合小程序的字号
+    background-color: #FFFFFF;
+}
+
+input::placeholder, textarea::placeholder {
+    font-size: 26rpx;
+    color: #909399;  // 更柔和的占位符颜色
+}
+
+textarea {
+    height: auto;
+    min-height: 180rpx;  // 文本框默认高度
+    padding: 20rpx 30rpx;  // 文本框特殊内边距
+    line-height: 1.5;  // 更好的行高
+    resize: none;  // 小程序中禁用resize
+}
+
+button {
+    background: linear-gradient(to right, #3B7CFF, #2C5EFF);  // 渐变背景
+    color: white;
+    border: none;
+    height: 88rpx;
+    font-size: 30rpx;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6rpx 16rpx rgba(59, 124, 255, 0.3);  // 添加阴影效果
+    transition: all 0.3s ease;
+}
+
+button:active {
+    transform: scale(0.98);  // 点击效果
+    background: linear-gradient(to right, #3371F6, #2857F4);  // 点击时的渐变
+    box-shadow: 0 3rpx 8rpx rgba(59, 124, 255, 0.2);
+}
+
+// 添加禁用状态样式
+button[disabled] {
+    background: #CCCCCC;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+// 添加表单组样式
+.form-group {
+    position: relative;
+    margin-bottom: 30rpx;
+}
+
+// 添加表单标签样式
+.form-label {
+    display: block;
+    margin-bottom: 12rpx;
+    font-size: 28rpx;
+    color: #333333;
+    font-weight: 500;
+}
+
+// 错误提示样式
+.error-tip {
+    font-size: 24rpx;
+    color: #FF4D4F;
+    margin-top: 8rpx;
+    margin-left: 30rpx;
+}

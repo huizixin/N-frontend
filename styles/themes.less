@@ -1,0 +1,69 @@
+// 主题变量定义
+// 微信主题
+@wx-primary: #07C160;
+@wx-secondary: #95E1B9;
+@wx-background: linear-gradient(135deg, #2F4858, #1B2838);
+@wx-card-background: rgba(255, 255, 255, 0.85);
+@wx-text: #333333;
+@wx-text-secondary: #666666;
+@wx-border: rgba(255, 255, 255, 0.1);
+@wx-circle-1: rgba(7, 193, 96, 0.1);
+@wx-circle-2: rgba(7, 193, 96, 0.07);
+
+// 抖音主题
+@tt-primary: #FE2C55;
+@tt-secondary: #BC2F87;
+@tt-background: linear-gradient(135deg, #1C1D25, #0F1015);
+@tt-card-background: rgba(255, 255, 255, 0.85);
+@tt-text: #333333;
+@tt-text-secondary: #666666;
+@tt-border: rgba(255, 255, 255, 0.1);
+@tt-circle-1: rgba(254, 44, 85, 0.1);
+@tt-circle-2: rgba(254, 44, 85, 0.07);
+
+// 玻璃态效果混入
+.glass-morphism(@bg-color) {
+    background: @bg-color;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+}
+
+// 主题圆圈背景混入
+.theme-circles(@circle1, @circle2) {
+    position: relative;
+    
+    .theme-circle-before {
+        position: absolute;
+        width: 300rpx;
+        height: 300rpx;
+        background-color: @circle1;
+        border-radius: 50%;
+        top: -100rpx;
+        right: -100rpx;
+        filter: blur(30rpx);
+        z-index: -1;
+    }
+    
+    .theme-circle-after {
+        position: absolute;
+        width: 200rpx;
+        height: 200rpx;
+        background-color: @circle2;
+        border-radius: 50%;
+        bottom: -50rpx;
+        left: -50rpx;
+        filter: blur(20rpx);
+        z-index: -1;
+    }
+}
+
+// 微信主题圆圈
+.theme-wx {
+    .theme-circles(@wx-circle-1, @wx-circle-2);
+}
+
+// 抖音主题圆圈
+.theme-tt {
+    .theme-circles(@tt-circle-1, @tt-circle-2);
+} 

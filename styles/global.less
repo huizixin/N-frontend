@@ -1,0 +1,60 @@
+@import './themes.less';
+
+page {
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+        Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+        sans-serif;
+}
+
+// 微信主题样式
+.theme-wx {
+    background: @wx-background;
+    color: @wx-text;
+    
+    .card, 
+    .task-item,
+    .draft-item,
+    .sent-item,
+    .received-item,
+    .form-container,
+    .function-group {
+        .glass-morphism(@wx-card-background);
+        border: 1rpx solid @wx-border;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, @wx-primary, @wx-secondary);
+        color: #FFFFFF;
+    }
+    
+    .text-primary {
+        color: @wx-primary;
+    }
+}
+
+// 抖音主题样式
+.theme-tt {
+    background: @tt-background;
+    color: @tt-text;
+    
+    .card,
+    .task-item,
+    .draft-item,
+    .sent-item,
+    .received-item,
+    .form-container,
+    .function-group {
+        .glass-morphism(@tt-card-background);
+        border: 1rpx solid @tt-border;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, @tt-primary, @tt-secondary);
+        color: #FFFFFF;
+    }
+    
+    .text-primary {
+        color: @tt-primary;
+    }
+} 
