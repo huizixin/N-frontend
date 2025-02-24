@@ -1,8 +1,15 @@
 <template>
-    <view :class="['product-container', $currentTheme]">
+    <Load v-if="!isLoggedIn" :isLoggedIn.sync="isLoggedIn"></Load>
+
+    <view v-else :class="['product-container', $currentTheme]">
         <!-- 标题区域 -->
         <view class="title-section glass-card">
             <text class="main-title">{{ isSmsView ? '短信商品' : '邮箱商品' }}</text>
+            <text class="line"></text>     
+            <view class="user-header" @click=gotoMine>
+                <image class="user-avatar" :src="userInfo.avatarUrl" mode="aspectFill" />
+                {{ userInfo.nickName }}
+            </view>    
         </view>
 
         <!-- 商品卡片区域 -->
@@ -16,8 +23,11 @@
                         :key="item.type"
                         @tap="selectProduct('sms', item.type)"
                     >
-                        <text class="product-title">{{ item.title }}</text>
-                        <text class="product-desc">{{ item.description }}</text>
+						<view>
+							<text class="product-title">{{ item.title }}</text>
+							<text class="product-desc">{{ item.description }}</text>
+						</view>
+						<text class="number">金额：{{item.number}}</text>
                         <view class="product-icon">
                             <text class="icon">💬</text>
                         </view>
@@ -32,8 +42,11 @@
                         :key="item.type"
                         @tap="selectProduct('email', item.type)"
                     >
-                        <text class="product-title">{{ item.title }}</text>
-                        <text class="product-desc">{{ item.description }}</text>
+						<view>
+							<text class="product-title">{{ item.title }}</text>
+							<text class="product-desc">{{ item.description }}</text>
+						</view>
+						<text class="number">金额：{{item.number}}</text>
                         <view class="product-icon">
                             <text class="icon">📧</text>
                         </view>
@@ -45,10 +58,8 @@
         <!-- 切换按钮 -->
         <view 
             class="toggle-btn glass-card"
-            :style="{ top: `${position.top}rpx`, left: `${position.left}rpx` }"
-            @touchstart="startDrag"
-            @touchmove="onDrag"
-            @touchend="endDrag"
+            :style="{ top: `${position.top}px`, left: `${position.left}px` }"
+
             @tap="toggleView"
         >
             <text>{{ isSmsView ? '邮箱' : '短信' }}</text>
@@ -57,38 +68,73 @@
 </template>
 
 <script>
+	import Load from "./components/load.vue"
 export default {
+	components:{Load},
     data() {
         return {
+            isLoggedIn:false,
+
             isSmsView: true,
-            position: { top: 350, left: -20 },
-            dragging: false,
-            startX: 0,
-            startY: 0,
-            screenWidth: 0,
-            screenHeight: 0,
+            position: { top: 0, left: 0 },
+
             isAnimating: false,
             smsProducts: [
-                { type: '1to1', title: '一对一', description: '单发单收的短信服务' },
-                { type: '1toN', title: '一对多', description: '单发多收的短信服务' },
-                { type: 'Nto1', title: '多对一', description: '多发单收的短信服务' }
+                { type: '1to1', title: '一对一', description: '单发单收的短信服务', number: 21 },
+                { type: '1toN', title: '一对多', description: '单发多收的短信服务', number: "21~99" },
+                { type: 'Nto1', title: '多对一', description: '多发单收的短信服务', number: "21~99" }
             ],
             emailProducts: [
-                { type: '1to1', title: '一对一', description: '单发单收的邮件服务' },
-                { type: '1toN', title: '一对多', description: '单发多收的邮件服务' },
-                { type: 'Nto1', title: '多对一', description: '多发单收的邮件服务' }
-            ]
+                { type: '1to1', title: '一对一', description: '单发单收的邮件服务', number: 21  },
+                { type: '1toN', title: '一对多', description: '单发多收的邮件服务', number: "21~99" },
+                { type: 'Nto1', title: '多对一', description: '多发单收的邮件服务', number: "21~99" }
+            ],
+            userInfo:{
+                nickName: '未登录',
+                avatarUrl: ''
+            }
         };
     },
     mounted() {
         uni.getSystemInfo({
             success: (res) => {
-                this.screenWidth = res.windowWidth;
-                this.screenHeight = res.windowHeight;
+                this.position.left = res.windowWidth - 60;
+                this.position.top = res.windowHeight - 120;
             }
         });
+		this.checkLoginStatus();
     },
     methods: {
+		checkLoginStatus() {
+		    uni.getStorage({
+		        key: 'userInfo',
+		        success: (res) => {
+		            if (res.data) {
+		                // 用户已登录，跳转到 product/product tab
+						this.userInfo = res.data || this.userInfo;
+						this.isLoggedIn=true;
+		            } else {
+		                // 用户未登录，跳转到登录页面
+		                uni.reLaunch({
+		                    url: '/pages/mine/mine'
+		                });
+		            }
+		        },
+		        fail: () => {
+		            // 用户未登录，跳转到登录页面
+		            uni.reLaunch({
+		                url: '/pages/mine/mine'
+		            });
+		        }
+		    });
+		},
+		
+		
+        gotoMine(){
+            uni.navigateTo({
+                url: `/pages/mine/mine`
+            });
+        },
         toggleView() {
             this.isAnimating = true;
             this.isSmsView = !this.isSmsView;
@@ -101,25 +147,6 @@ export default {
                 url: `/pages/inputProductForm/inputProductForm?type=${type}&mode=${mode}`
             });
         },
-        startDrag(event) {
-            this.dragging = true;
-            this.startX = event.touches[0].clientX - this.position.left;
-            this.startY = event.touches[0].clientY - this.position.top;
-        },
-        onDrag(event) {
-            if (this.dragging) {
-                this.position.left = event.touches[0].clientX - this.startX;
-                this.position.top = event.touches[0].clientY - this.startY;
-            }
-        },
-        endDrag() {
-            this.dragging = false;
-            if (this.position.left + 30 > this.screenWidth / 2) {
-                this.position.left = this.screenWidth - 140;
-            } else {
-                this.position.left = -20;
-            }
-        }
     }
 }
 </script>
@@ -131,40 +158,45 @@ export default {
     background: #FFFFFF;
 
     .title-section {
-        padding: 30rpx;
-        margin-bottom: 40rpx;
-        border-radius: 20rpx;
-        text-align: center;
-        border: 1rpx solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-
-        .theme-wx & {
-            background: rgba(7, 193, 96, 0.1);
-            backdrop-filter: blur(20rpx);
-            border: 1rpx solid rgba(7, 193, 96, 0.1);
+        position: absolute;
+        top: 40rpx;
+        left: -10rpx;
+        display: flex;
+        align-items: center;
+        .main-title{
+            padding: 30rpx;
+            border-radius: 20rpx;
+            text-align: right;
+            border: 1rpx solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+            color: @wx-primary;
+        }
+        .line{
+            width: 30px;
+            height:0px;
+            margin: 8px;
+            border:1px solid #ccc;
+        }
+        .user-header{
+            display: flex;
+            align-items: center;
+            image{
+                width: 60px;
+                height: 60px;
+                border-radius: 30px;
+                margin-right: 8px;
+            }
         }
 
-        .theme-tt & {
-            background: rgba(254, 44, 85, 0.1);
-            backdrop-filter: blur(20rpx);
-            border: 1rpx solid rgba(254, 44, 85, 0.1);
-        }
 
         .main-title {
             font-size: 36rpx;
             font-weight: 500;
-            
-            .theme-wx & {
-                color: @wx-primary;
-            }
-            
-            .theme-tt & {
-                color: @tt-primary;
-            }
         }
     }
 
     .products-section {
+        margin-top: 180rpx;
         .products-wrapper {
             transition: all 0.3s ease-out;
 
@@ -184,17 +216,12 @@ export default {
         border-radius: 20rpx;
         position: relative;
         transition: all 0.2s ease-out;
-        box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+        // box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
         background: rgba(7, 193, 96, 0.05);
         backdrop-filter: blur(20rpx);
         border: 1rpx solid rgba(7, 193, 96, 0.1);
-
-        &:active {
-            background: rgba(7, 193, 96, 0.08);
-            transform: scale(0.98);
-            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-        }
-
+		display: flex;
+		align-items: center;
         .product-title {
             font-size: 32rpx;
             font-weight: 500;
@@ -210,7 +237,10 @@ export default {
             display: block;
             padding-right: 80rpx;
         }
-
+		.number{
+            font-size: 16px;
+			color: @wx-primary;
+		}
         .product-icon {
             position: absolute;
             right: 40rpx;
@@ -232,6 +262,12 @@ export default {
     }
 
     .toggle-btn {
+        position: absolute;
+        width: 70px;
+        height: 70px;
+        border-radius: 35px;
+        text-align:center;
+        line-height: 70px;
         background: @wx-primary;
         color: #FFFFFF;
         box-shadow: 0 8rpx 32rpx rgba(7, 193, 96, 0.3);

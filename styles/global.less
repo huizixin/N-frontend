@@ -1,5 +1,18 @@
 @import './themes.less';
 
+view, button, input, text, textarea{
+    box-sizing: border-box;
+}
+button {
+	background: @wx-primary;
+	border: 1px solid @wx-primary;
+	box-shadow: none;
+	&:focus, &:active{
+		background: @wx-secondary;
+		color:#fff;
+	}
+}
+
 page {
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
@@ -19,7 +32,6 @@ page {
     .received-item,
     .form-container,
     .function-group {
-        .glass-morphism(@wx-card-background);
         border: 1rpx solid @wx-border;
     }
     
@@ -45,7 +57,6 @@ page {
     .received-item,
     .form-container,
     .function-group {
-        .glass-morphism(@tt-card-background);
         border: 1rpx solid @tt-border;
     }
     

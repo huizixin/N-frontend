@@ -1,7 +1,11 @@
 {
   "pages": [
     {
-    	"path" : "pages/index/index"
+    	"path" : "pages/product/product",
+    	"style" : 
+    	{
+    		"navigationBarTitleText" : "产品"
+    	}
     },
     {
     	"path" : "pages/mine/mine",
@@ -9,13 +13,6 @@
     	{
     		"navigationBarTitleText" : "个人中心",
     		"enablePullDownRefresh": true
-    	}
-    },
-    {
-    	"path" : "pages/product/product",
-    	"style" : 
-    	{
-    		"navigationBarTitleText" : "产品"
     	}
     },
     {
@@ -68,28 +65,15 @@
     	{
     		"navigationBarTitleText" : "我的余额"
     	}
+    },
+    {
+    	"path" : "pages/login/login",
+    	"style" : 
+    	{
+    		"navigationBarTitleText" : "登录"
+    	}
     }
   ],
-  "tabBar": {
-  	"color": "#7A7E83",
-  	"selectedColor": "#3cc51f",
-  	"borderStyle": "black",
-  	"backgroundColor": "#ffffff",
-  	"list": [
-		{
-			"pagePath": "pages/product/product",
-			"text": "商品"
-		},
-		{
-			"pagePath": "pages/tasks/tasks",
-			"text": "任务"
-		},
-		{
-			"pagePath":  "pages/mine/mine",
-			"text": "我的"
-		} 
-	]
-  },
   "globalStyle": {
 	"navigationBarTextStyle": "white",
 	"navigationBarTitleText": "N线",

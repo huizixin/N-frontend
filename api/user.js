@@ -1,28 +1,27 @@
 import request from '../utils/request'
 
-export default {
-    // 微信登录
-    wxLogin(code, userInfo) {
-        return request.post('/api/login/wx', { code, userInfo })
-    },
 
-    // 抖音登录
-    ttLogin(code, userInfo) {
-        return request.post('/api/login/tt', { code, userInfo })
-    },
+// 微信登录
+export function wxLoginApi(data) {
+        return request.post('/wechat/login', data)
+}
 
-    // 获取用户信息
-    getUserInfo() {
-        return request.get('/api/user/info')
-    },
+// 获取验证码
+export function sendCodeApi(data) {
+    return request.post('/phone/code', data)
+}
 
-    // 获取数据统计
-    getCounts() {
-        return request.get('/api/user/counts')
-    },
+// 绑定手机号
+export function bindPhoneNumberApi(data) {
+    return request.post('/wechat/bindPhone', data)
+}
 
-    // 获取余额
-    getBalance() {
-        return request.get('/api/user/balance')
-    }
-} 
+// 获取数据统计
+export function getCounts() {
+    return request.get('/api/user/counts')
+}
+
+// 获取余额
+export function getBalance() {
+    return request.get('/api/user/balance')
+}

@@ -1,102 +1,134 @@
 <template>
     <view class="form-container">
-        <!-- 1对1模式 -->
-        <view class="form-group" v-if="mode === '1to1'">
-            <text class="form-label">接收方手机号</text>
-            <input 
-                v-model="phoneNumber" 
-                placeholder="请输入对方手机号" 
-                @blur="validatePhoneNumber()" 
-            />
-            <text v-if="errors.phone" class="error-tip">{{ errors.phone }}</text>
+        <view class="form-group">
+			<!-- 1对1模式 -->
+			<template  v-if="mode === '1to1'">
+				<text class="form-label">接收方手机号</text>
+				<input 
+					v-model="phoneNumber" 
+					placeholder="请输入对方手机号" 
+					@blur="validatePhoneNumber()" 
+				/>
+				<text class="error-tip">{{ errors.phone || ' ' }}</text>
+			</template>
+			
+			<!-- 1对多模式 -->
+			<template v-else-if="mode === '1toN'">
+				<text class="form-label">接收方手机号列表</text>
+				<view v-for="(phone, index) in phoneNumbers" :key="index" class="phone-input-group">
+					<view style="display: flex; align-items: center;">
+						<input 
+							v-model="phoneNumbers[index]" 
+							placeholder="请输入对方手机号" 
+							@blur="validatePhoneNumber(index)" 
+						/>
+						<button v-if="phoneNumbers.length>1" style="width: 30px; height: 30px; line-height: 30px; border-radius: 15px; padding:0; margin: 0 0 0 15px; font-size:14px; border:1px solid red; color:red; background: #fff;" @click=deletePhoneNumber(index)> X </button>
+					</view>
+					<text class="error-tip">
+						{{ errors.phones[index] || ' ' }}
+					</text>
+				</view>
+				<button @click="addPhoneNumber" class="secondary-button">+ 添加手机号</button>
+			</template>
+
+			<!-- 多对1模式 -->
+			<template v-else-if="mode === 'Nto1'">
+				<text class="form-label">接收方手机号</text>
+				<input 
+					v-model="phoneNumber" 
+					placeholder="请输入对方手机号" 
+					@blur="validatePhoneNumber()" 
+				/>
+				<text class="error-tip">{{ errors.phone || ' ' }}</text>
+
+				<text class="form-label">数量选择</text>
+				<picker 
+					mode="selector" 
+					:range="quantityOptions" 
+					@change="onQuantityChange"
+					class="picker quantity-picker"
+				>
+					<view class="picker-current">
+						{{ quantityOptions[quantityIndex] }}
+					</view>
+				</picker>
+			</template>
+		
+			<text class="form-label">内容</text>
+			<textarea 
+				v-model="content" 
+				placeholder="请输入内容（不超过300字）" 
+				maxlength="300"
+			></textarea>
+			<text class="error-tip">{{ errors.content || ' '}}</text>
+			
+			<text class="form-label">发送</text>
+			<radio-group class="radio-group" @change="radioChange">
+				<label class="radio"><radio value="r1" :checked="sendType === 'r1'" />现在</label>
+				<label class="radio"><radio value="r2" :checked="sendType === 'r2'" />定时</label>
+			</radio-group>
+			
+			<template v-if="sendType === 'r2'">
+				<text class="form-label">定时日期</text>
+				<picker 
+				    mode="date" 
+				    @change="onDateChange"
+				    class="picker datetime-picker"
+				>
+				    <view class="picker-current">
+				        {{ selectedDate ? selectedDate : '请选择日期' }}
+				    </view>
+				</picker>
+				<text class="error-tip">{{ errors.selectedDate || ' ' }}</text>
+				
+				
+				<text class="form-label">定时时间</text>
+				<picker 
+				    mode="time" 
+				    @change="onTimeChange"
+				    class="picker datetime-picker"
+				>
+				    <view class="picker-current">
+				        {{ selectedTime ? selectedTime : '请选择时间' }}
+				    </view>
+				</picker>
+				<text class="error-tip">{{ errors.selectedTime || ' ' }}</text>
+			</template>
             
-            <text class="form-label">内容</text>
-            <textarea 
-                v-model="content" 
-                placeholder="请输入内容（不超过300字）" 
-                maxlength="300"
-            ></textarea>
-            <text v-if="errors.content" class="error-tip">{{ errors.content }}</text>
-        </view>
-
-        <!-- 1对多模式 -->
-        <view class="form-group" v-else-if="mode === '1toN'">
-            <text class="form-label">接收方手机号列表</text>
-            <view v-for="(phone, index) in phoneNumbers" :key="index" class="phone-input-group">
-                <input 
-                    v-model="phoneNumbers[index]" 
-                    placeholder="请输入对方手机号" 
-                    @blur="validatePhoneNumber(index)" 
-                />
-                <text v-if="errors.phones && errors.phones[index]" class="error-tip">
-                    {{ errors.phones[index] }}
-                </text>
-            </view>
-            <button @click="addPhoneNumber" class="secondary-button">+ 添加手机号</button>
-        
-            <text class="form-label">内容</text>
-            <textarea 
-                v-model="content" 
-                placeholder="请输入内容（不超过300字）" 
-                maxlength="300"
-            ></textarea>
-            <text v-if="errors.content" class="error-tip">{{ errors.content }}</text>
-        
-        </view>
-
-        <!-- 多对1模式 -->
-        <view class="form-group" v-else-if="mode === 'Nto1'">
-            <text class="form-label">接收方手机号</text>
-            <input 
-                v-model="phoneNumber" 
-                placeholder="请输入对方手机号" 
-                @blur="validatePhoneNumber()" 
-            />
-            <text v-if="errors.phone" class="error-tip">{{ errors.phone }}</text>
-
-            <text class="form-label">内容</text>
-            <textarea 
-                v-model="content" 
-                placeholder="请输入内容（不超过300字）" 
-                maxlength="300"
-            ></textarea>
-            <text v-if="errors.content" class="error-tip">{{ errors.content }}</text>
-
-            <text class="form-label">数量选择</text>
-            <picker 
-                mode="selector" 
-                :range="quantityOptions" 
-                @change="onQuantityChange"
-                class="quantity-picker"
-            >
-                <view class="picker">
-                    {{ quantityOptions[quantityIndex] }}
-                </view>
-            </picker>
-        </view>
+		</view>
 
         <button 
-            @click="submitForm"
+            @click.stop="submitForm"
             :disabled="!isFormValid"
-        >提交</button>
+        >购买</button>
     </view>
 </template>
 
 <script>
+import {  phoneRegex } from "@/utils/regex";
     export default {
         data() {
             return {
                 mode: '', // 1to1, 1toN, Nto1
+				
                 phoneNumber: '',
                 phoneNumbers: [''],
                 content: '',
-                quantityOptions: ['1-10条：30元', '11-30条：70元', '30-100条：150元'],
+				sendType:'r1',
+				selectedDate: '',
+				selectedTime: '',
+				
+                quantityOptions: ['1-10条：20元', '11-20条：50元', '21-30条：99元'],
                 quantityIndex: 0,
+				
                 errors: {
                     phone: '',
-                    phones: {},
-                    content: ''
-                }
+                    phones: [],
+                    content: '',
+					selectedDate: '',
+					selectedTime: ''
+                },
+				
             };
         },
         computed: {
@@ -104,10 +136,14 @@
                 if (this.mode === '1to1' || this.mode === 'Nto1') {
                     return !this.errors.phone && 
                            !this.errors.content && 
+						   !this.errors.selectedDate &&
+						   !this.errors.selectedTime &&
                            this.phoneNumber.trim() && 
-                           this.content.trim();
+                           this.content.trim()&&
+						   this.selectedDate &&
+						   this.selectedTime;
                 } else {
-                    return Object.keys(this.errors.phones).length === 0 && 
+                    return this.errors.phones.filter(item => !!item).length === 0 && 
                            this.phoneNumbers.some(phone => phone.trim());
                 }
             }
@@ -118,7 +154,7 @@
         methods: {
             validatePhoneNumber(index) {
                 const phone = index !== undefined ? this.phoneNumbers[index] : this.phoneNumber;
-                const phoneRegex = /^1[3-9]\d{9}$/;
+               
                 
                 if (!phone.trim()) {
                     if (index !== undefined) {
@@ -140,7 +176,7 @@
                 
                 // 验证通过，清除错误信息
                 if (index !== undefined) {
-                    this.$delete(this.errors.phones, index);
+                    this.$set(this.errors.phones, index, '');
                 } else {
                     this.errors.phone = '';
                 }
@@ -187,11 +223,26 @@
             },
 
             addPhoneNumber() {
-                this.phoneNumbers.push('');
+				const isVali = this.validatePhoneNumber(this.phoneNumbers.length - 1);
+				if(isVali) this.phoneNumbers.push('');
             },
+			deletePhoneNumber(index){
+				this.phoneNumbers.splice(index, 1);
+				this.errors.phones.splice(index, 1);
+			},
+			radioChange(event){
+				console.log("event", event);
+				this.sendType = event.detail.value;
+			},
             onQuantityChange(event) {
                 this.quantityIndex = event.detail.value;
             },
+			onDateChange(event){
+				this.selectedDate = event.detail.value;
+			},
+			onTimeChange(event){
+				this.selectedTime = event.detail.value;
+			},
             submitForm() {
                 if (!this.validateForm()) {
                     uni.showToast({
@@ -220,6 +271,15 @@
 </script>
 
 <style lang="less">
+input, text{
+    margin-bottom: 5rpx;
+}
+textarea{
+    max-height: 40vh;
+}
+.error-msg{
+    margin-bottom: 10px;
+}
 
 .form-container {
     padding: 30rpx;
@@ -234,16 +294,24 @@
 .secondary-button {
     width: 300rpx;
     background: #FFFFFF !important;
-    color: #3B7CFF !important;
-    border: 2rpx solid #3B7CFF !important;
+    color: @wx-primary !important;
+    border: 2rpx solid @wx-primary !important;
     margin-top: 20rpx;
 }
 
-.quantity-picker {
-    background-color: #FFFFFF;
-    
-    .picker {
-        padding: 20rpx 30rpx;
+.radio-group{
+	margin-bottom: 10px;
+	font-size: 14px;
+	.radio{
+		margin-right: 8px;
+	}
+}
+
+
+.picker {
+    .picker-current {
+		font-size: 13px;
+        padding: 10px 15px;
         border-radius: 8rpx;
     }
 }

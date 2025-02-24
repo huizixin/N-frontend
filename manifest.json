@@ -1,7 +1,7 @@
 {
     "name" : "N 线",
     "appid" : "",
-    "description" : "基于uni-app开发的新闻/资讯类App模板",
+    "description" : "基于uni-app开发定时短信，定时邮件服务",
     "versionName" : "3.1.23",
     "versionCode" : 1,
     "transformPx" : false,
@@ -83,7 +83,10 @@
             "postcss" : false,
             "minified" : true
         },
-        "usingComponents" : true
+        "usingComponents" : true,
+        "secureNetwork" : {
+            "enable" : false
+        }
     },
     "mp-alipay" : {
         "usingComponents" : true

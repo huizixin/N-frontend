@@ -2,17 +2,7 @@ import App from './App.vue'
 
 import "./form_global.less"
 import './styles/global.less';
-
-// #ifndef VUE3
-import Vue from 'vue'
-Vue.config.productionTip = false
-App.mpType = 'app'
-const app = new Vue({
-  ...App
-})
-app.$mount()
-// #endif
-
+import './styles/model.less';
 
 // #ifdef VUE3
 import {

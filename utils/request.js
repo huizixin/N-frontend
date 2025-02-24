@@ -1,6 +1,6 @@
 import auth from './auth'
 
-const baseURL = 'https://api.example.com' // 替换为您的实际API地址
+const baseURL = 'http://localhost:3000' // 替换为您的实际API地址
 
 const request = (options = {}) => {
     return new Promise((resolve, reject) => {
