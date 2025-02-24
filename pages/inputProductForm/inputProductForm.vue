@@ -261,10 +261,53 @@ import {  phoneRegex } from "@/utils/regex";
                     quantity: this.quantityOptions[this.quantityIndex]
                 });
 
-                uni.showToast({
-                    title: '表单提交成功',
-                    icon: 'success'
-                });
+                // 根据商品信息获取订单id
+              // https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi
+
+
+
+              const prepayInfo = {
+                data:{
+                  "appid": "wx7e12f6f181e44566",  // 微信开放平台 - 应用 - AppId，注意和微信小程序、公众号 AppId 可能不一致
+                  "nonceStr": "c5sEwbaNPiXAF3iv", // 随机字符串
+                  "package": "prepay_id=wx202254********************fbe90000",        // 固定值
+
+                  "timeStamp": Date.now(),        // 时间戳（单位：秒）
+                  "signType":'MD5',
+                  "paySign": "A842B45937F6EFF60DEC7A2EAA52D5A0" // 签名，这里用的 MD5/RSA 签名
+                }
+              }
+            //  签名 paySign 参数说明
+            //  ◆ 参数名ASCII码从小到大排序（字典序）；
+            //  ◆ 如果参数的值为空不参与签名；
+            //  ◆ 参数名区分大小写；
+
+                // 根据订单id 等信息 唤起微信支付
+              uni.getProvider({
+                service: 'payment',
+                success: function (res) {
+                  console.log(res.provider)
+                  if (~res.provider.indexOf('weixin')) {
+                    uni.requestPayment({
+                      "provider": res.provider,
+                      "orderInfo": {
+                        ...prepayInfo
+                      },
+                      success(res) {
+                        uni.showToast({
+                          title: '支付成功',
+                          icon: 'success'
+                        });
+                        uni.navigateBack()
+                      },
+                      fail(e) {}
+                    })
+                  }
+                }
+              });
+
+
+
             }
         }
     }

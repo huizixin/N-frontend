@@ -5,8 +5,8 @@
             <button 
                 class="login-btn"
                 :class="platform"
-                lang="zh_CN"
-                @tap="handleLogin"
+                open-type="chooseAvatar"
+                @chooseavatar="onChooseavatar"
             >
                 {{ platform === 'wx' ? '微信登录' : '抖音登录' }}
             </button>
@@ -23,15 +23,17 @@
                         <text class="balance">{{ userInfo.phone }}</text>
                     </view>
                 </view>
-                <button  v-if="!userInfo.phone" style="font-size: 24rpx; margin:0 0 0 40rpx; padding:0; width: 160rpx;" @click="showSuccessModal=true" >绑定手机号</button>
             </view>
         </view>
 
        
         <view v-if="showSuccessModal" class="modal">
             <view class="modal-content" >
-                <view style="font-size: 36rpx; margin-bottom:240rpx;">关联手机号</view>
-                <input style="text-align: left;" type="text" v-model="phoneNumber" placeholder="请输入手机号" />
+                <view style="font-size: 36rpx; margin-bottom:240rpx;">补充个人信息</view>
+
+                <input style="text-align: left;" type="nickname" name="nickname" v-model="userInfo.nickName" placeholder="请输入昵称" />
+
+                <input style="text-align: left;" type="text" v-model="userInfo.phone" placeholder="请输入手机号" />
                 <view style="display: flex; align-items: center; text-align: left;">
                     <input type="text" v-model="verificationCode" placeholder="请输入验证码" />
                     
@@ -87,7 +89,7 @@
 
 <script>
 import {  phoneRegex } from "@/utils/regex";
-import {wxLoginApi, bindPhoneNumberApi, sendCodeApi } from '@/api/user'
+import {wxLoginApi, registerApi, sendCodeApi } from '@/api/user'
 import {Gender} from "@/utils/config.js"
 export default {
     data() {
@@ -125,19 +127,18 @@ export default {
             // #ifdef MP-WEIXIN
             this.platform = 'wx'
             // #endif
-            
+
             // #ifdef MP-TOUTIAO
             this.platform = 'tt'
             // #endif
         },
-        
+
         async checkLoginStatus() {
             try {
                 const token = uni.getStorageSync('token')
                 if (token) {
                     this.isLoggedIn = true
                     this.getUserInfo()
-                    await this.getCountsInfo()
                 }
             } catch (error) {
                 console.error('检查登录状态失败：', error)
@@ -145,70 +146,34 @@ export default {
         },
 
         getUserInfo(){
-            const userInfo = uni.getStorageSync('userInfo')
-            this.userInfo = userInfo
+            this.userInfo = uni.getStorageSync('userInfo')
         },
-        
-        async handleLogin() {
-            try {
-                if (this.platform === 'wx') {
-                    await this.wxLogin()
-                } else {
-                    await this.ttLogin()
-                }
-            } catch (error) {
-                console.error('登录失败：', error)
-                uni.showToast({
-                    title: '登录失败',
-                    icon: 'none'
-                })
+
+        onChooseAvatar(){
+          const {avatarUrl} = e.detail;
+          this.userInfo.avatarUrl = avatarUrl;
+          wxLoginApi().then(res=>{
+            if(res.data.userInfo?.phone){
+              uni.showToast({
+                title: '登录成功',
+                icon: 'success'
+              })
+              this.loginSuccess(res.data);
+            }else{
+              this.showSuccessModal=true;
             }
+          })
         },
-        
-        async wxLogin() {
-            uni.getUserProfile({
-                desc: '获取用户基本信息', // 必须有描述
-                success: (res) => {
-                    console.log('用户信息:', res.userInfo);
-                    this.handleLoginSuccess({userInfo:res.userInfo,token:'123456'})
-                },
-                fail: (err) => {
-                    console.error('获取用户信息失败:', err);
-                }
-            });
-            return;
 
-            const { userInfo } = await uni.getUserProfile({
-                desc: '用于完善会员信息', // 必须填写声明
-                lang: 'zh_CN'
-            })
-
-            this.handleLoginSuccess({userInfo,token:'123456'})
-            return;
-            
-            // 发送登录请求到服务器
-            const res = wxLoginApi({
-                code:this.wxCode,
-                userInfo
-            })
-
-            if(res.code === 200){
-                if(res.phone){
-                    this.handleLoginSuccess(res.data)
-                }else{ // 没有手机号，提示用户关联手机号
-                    this.showSuccessModal=true;
-                }
-            }
-        },
 
         async sendVerificationCode() {
-                if (!this.phoneNumber) {
+                if (!this.userInfo.phone) {
                     uni.showToast({
                         title: '请输入手机号',
                         icon: 'none'
                     });
                     return;
-                }else if(!phoneRegex.test(this.phoneNumber)){
+                }else if(!phoneRegex.test(this.userInfo.phone)){
                     uni.showToast({
                         title: '手机号格式不正确',
                         icon: 'none'
@@ -248,34 +213,56 @@ export default {
         },
 
         bindPhoneNumber(){
+          if(!this.userInfo.nickName){
+            uni.showToast({
+                title: '请输入昵称',
+                icon: 'none'
+            });
+          }else if(!this.userInfo.phone){
+            uni.showToast({
+              title: '请输入手机号码',
+              icon: 'none'
+            });
+          }else if(!phoneRegex.test(this.userInfo.phone)){
+            uni.showToast({
+              title: '手机号码格式不正确',
+              icon: 'none'
+            });
+          }else if(!this.uuid){
+            uni.showToast({
+              title: '请获取验证码',
+              icon: 'none'
+            });
+          }else if(!this.verificationCode){
+            uni.showToast({
+              title: '请输入验证码',
+              icon: 'none'
+            });
+          }
             const data = {
-                phone: this.phoneNumber,
+                ...this.userInfo,
                 code: this.verificationCode,
                 uuid:this.uuid
             }
-            bindPhoneNumberApi(data).then(res=>{
+            registerApi(data).then(res=>{
                 if(res.success){
                     this.showSuccessModal = false;
-                    this.$set(this.userInfo, 'phone', this.phoneNumber);
                     uni.showToast({
                         title: '绑定成功',
                         icon: 'success'
                     })
+                  this.loginSuccess(res.data);
                 }
             })
         },
-        
-        handleLoginSuccess(data) {
-            uni.setStorageSync('token', data.token)
-            uni.setStorageSync('userInfo', data.userInfo)
-            this.userInfo = data.userInfo
-            this.isLoggedIn = true
-            this.getCountsInfo()
-        },
-        
-        async getCountsInfo() {
 
+        loginSuccess(data){
+          uni.setStorageSync('token', data.token)
+          uni.setStorageSync('userInfo', data.userInfo)
+          this.userInfo = data.userInfo
+          this.isLoggedIn = true
         },
+
         
         navigateTo(url) {
             if (!this.isLoggedIn) {

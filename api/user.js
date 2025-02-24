@@ -11,17 +11,12 @@ export function sendCodeApi(data) {
     return request.post('/phone/code', data)
 }
 
-// 绑定手机号
-export function bindPhoneNumberApi(data) {
-    return request.post('/wechat/bindPhone', data)
+// 注册用户
+export function registerApi(data) {
+    return request.post('/wechat/register', data)
 }
 
-// 获取数据统计
-export function getCounts() {
+// 获取已发送列表
+export function getSentList() {
     return request.get('/api/user/counts')
-}
-
-// 获取余额
-export function getBalance() {
-    return request.get('/api/user/balance')
 }

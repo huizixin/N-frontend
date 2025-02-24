@@ -34,8 +34,7 @@
 </template>
 
 <script>
-import request from '../../utils/request'
-
+import {getSentList} from "@/api/user.js"
 export default {
     data() {
         return {
@@ -72,7 +71,7 @@ export default {
     methods: {
         async loadSentList() {
             try {
-                const res = await request.get('/api/sent', {
+                const res = await getSentList({
                     page: this.page,
                     pageSize: this.pageSize
                 })
