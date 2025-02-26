@@ -2,14 +2,11 @@
     <view class="mine-container">
         <!-- 未登录状态 -->
         <view v-if="!isLoggedIn" class="login-section">
-            <button 
-                class="login-btn"
-                :class="platform"
-                open-type="chooseAvatar"
-                @chooseavatar="onChooseavatar"
-            >
-                {{ platform === 'wx' ? '微信登录' : '抖音登录' }}
-            </button>
+			<button
+				class="login-btn"
+				:class="platform"
+				@tap="wxLogin"
+			>微信登录</button>
         </view>
 
         <!-- 已登录状态 -->
@@ -27,17 +24,27 @@
         </view>
 
        
-        <view v-if="showSuccessModal" class="modal">
+        <view v-if="showRegisterShow" class="modal">
             <view class="modal-content" >
-                <view style="font-size: 36rpx; margin-bottom:240rpx;">补充个人信息</view>
-
-                <input style="text-align: left;" type="nickname" name="nickname" v-model="userInfo.nickName" placeholder="请输入昵称" />
-
+                <view style="font-size: 36rpx; margin-bottom:100rpx;">补充个人信息</view>
+				
+				<view style="display: flex;align-items:flex-end;">
+					<button 
+						class="avatar-btn"	
+						:class="platform"
+						open-type="chooseAvatar"
+						@chooseavatar="onChooseAvatar">
+						<image :src="userInfo.avatarUrl || defaultUrl" style="wdth:100%;height:100%;"></image>
+					</button>
+					
+					<input style="text-align: left; flex:1" type="nickname" name="nickname" v-model="userInfo.nickName" placeholder="请输入昵称" />
+				</view>
+				
                 <input style="text-align: left;" type="text" v-model="userInfo.phone" placeholder="请输入手机号" />
                 <view style="display: flex; align-items: center; text-align: left;">
                     <input type="text" v-model="verificationCode" placeholder="请输入验证码" />
                     
-                    <button class="btn" style="margin-left: 40rpx;" @click="sendVerificationCode" :disabled="isSendingCode">
+                    <button class="btn send-btn" style="margin-left: 40rpx;" @click="sendVerificationCode" :disabled="isSendingCode">
                         {{ isSendingCode ? `${countdown}s` : '发送验证码' }}
                     </button>
                 </view>
@@ -97,30 +104,31 @@ export default {
 			Gender,
             isLoggedIn: false,
             platform: 'wx', // 'wx' 或 'tt'
+			
+			defaultUrl:'',
             userInfo: {
                 avatarUrl: '',
-                nickName: ''
+                nickName: '',
+				phone:'',
+				code:''
             },
-            balance: '0.00',
+			
             counts: {
                 draft: 0,
                 sent: 0,
                 received: 0
             },
 
-            showSuccessModal: false,
-            countdown: 60,
-
+            showRegisterShow: false,
+			uuid:'',
             verificationCode: '',
             isSendingCode: false,
-            wxCode :''
+            countdown: 60,
         }
     },
     async onLoad() {
         this.checkPlatform()
         this.checkLoginStatus()
-        const { code } = await uni.login()
-        this.wxCode = code
     },
     methods: {
         checkPlatform() {
@@ -144,25 +152,31 @@ export default {
                 console.error('检查登录状态失败：', error)
             }
         },
+		
+		async wxLogin (){
+			// const { code } = await uni.login()
+			// wxLoginApi({code}).then(res=>{
+			// 	if(res.code === 200){
+			// 		if(res.data.userInfo?.phone){
+			// 			uni.showToast({
+			// 			  title: '登录成功',
+			// 			  icon: 'success'
+			// 			})
+			// 			this.loginSuccess(res.data);
+			// 		}else{
+						this.showRegisterShow=true;
+			// 	   }
+			// 	}
+			// })
+		},
 
         getUserInfo(){
             this.userInfo = uni.getStorageSync('userInfo')
         },
 
-        onChooseAvatar(){
-          const {avatarUrl} = e.detail;
-          this.userInfo.avatarUrl = avatarUrl;
-          wxLoginApi().then(res=>{
-            if(res.data.userInfo?.phone){
-              uni.showToast({
-                title: '登录成功',
-                icon: 'success'
-              })
-              this.loginSuccess(res.data);
-            }else{
-              this.showSuccessModal=true;
-            }
-          })
+        onChooseAvatar(e){
+			  const {avatarUrl} = e.detail;
+			  this.userInfo.avatarUrl = avatarUrl;
         },
 
 
@@ -213,12 +227,17 @@ export default {
         },
 
         bindPhoneNumber(){
-          if(!this.userInfo.nickName){
-            uni.showToast({
-                title: '请输入昵称',
-                icon: 'none'
-            });
-          }else if(!this.userInfo.phone){
+			if(!this.userInfo.avatarUrl){
+			  uni.showToast({
+			      title: '请上传头像',
+			      icon: 'none'
+			  });
+			}else if(!this.userInfo.nickName){
+				uni.showToast({
+					title: '请输入昵称',
+					icon: 'none'
+				});
+			}else if(!this.userInfo.phone){
             uni.showToast({
               title: '请输入手机号码',
               icon: 'none'
@@ -246,7 +265,7 @@ export default {
             }
             registerApi(data).then(res=>{
                 if(res.success){
-                    this.showSuccessModal = false;
+                    this.showRegisterShow = false;
                     uni.showToast({
                         title: '绑定成功',
                         icon: 'success'
@@ -316,6 +335,7 @@ export default {
             color: #FFFFFF;
         }
     }
+
 }
 
 .user-info-section {
@@ -417,6 +437,16 @@ input{
 
 .bind-btn {
     margin-top:40rpx;
-    background-color: #07c160; /* 微信主题色 */
+    background-color: @wx-primary; /* 微信主题色 */
+}
+
+.avatar-btn{
+	width:80px;
+	height:80px;
+	border-radius: 40px;
+	overflow: hidden;
+	padding:0px;
+	background-color: transparent;
+	margin-right: 10px;
 }
 </style>

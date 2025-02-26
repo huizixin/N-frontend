@@ -1,6 +1,6 @@
 <template>
-    <Load v-if="!isLoggedIn" :isLoggedIn.sync="isLoggedIn"></Load>
-
+    <Load v-if="!isLoggedIn"></Load>
+    
     <view v-else :class="['product-container', $currentTheme]">
         <!-- 标题区域 -->
         <view class="title-section glass-card">
@@ -23,11 +23,11 @@
                         :key="item.type"
                         @tap="selectProduct('sms', item.type)"
                     >
-						<view>
-							<text class="product-title">{{ item.title }}</text>
-							<text class="product-desc">{{ item.description }}</text>
-						</view>
-						<text class="number">金额：{{item.number}}</text>
+                        <view>
+                            <text class="product-title">{{ item.title }}</text>
+                            <text class="product-desc">{{ item.description }}</text>
+                        </view>
+                        <text class="number">金额：{{item.number}}</text>
                         <view class="product-icon">
                             <text class="icon">💬</text>
                         </view>
@@ -42,11 +42,11 @@
                         :key="item.type"
                         @tap="selectProduct('email', item.type)"
                     >
-						<view>
-							<text class="product-title">{{ item.title }}</text>
-							<text class="product-desc">{{ item.description }}</text>
-						</view>
-						<text class="number">金额：{{item.number}}</text>
+                        <view>
+                            <text class="product-title">{{ item.title }}</text>
+                            <text class="product-desc">{{ item.description }}</text>
+                        </view>
+                        <text class="number">金额：{{item.number}}</text>
                         <view class="product-icon">
                             <text class="icon">📧</text>
                         </view>
@@ -69,7 +69,7 @@
 
 <script>
 	import Load from "./components/load.vue"
-export default {
+	export default {
 	components:{Load},
     data() {
         return {
@@ -95,14 +95,14 @@ export default {
             }
         };
     },
-    mounted() {
-        uni.getSystemInfo({
-            success: (res) => {
-                this.position.left = res.windowWidth - 60;
-                this.position.top = res.windowHeight - 120;
-            }
-        });
-		this.checkLoginStatus();
+    onLoad() {
+		uni.getSystemInfo({
+		    success: (res) => {
+		        this.position.left = res.windowWidth - 60;
+		        this.position.top = res.windowHeight - 120;
+		    }
+		});
+		this.checkLoginStatus()
     },
     methods: {
 		checkLoginStatus() {
@@ -115,14 +115,14 @@ export default {
 						this.isLoggedIn=true;
 		            } else {
 		                // 用户未登录，跳转到登录页面
-		                uni.reLaunch({
+		                uni.redirectTo({
 		                    url: '/pages/mine/mine'
 		                });
 		            }
 		        },
 		        fail: () => {
 		            // 用户未登录，跳转到登录页面
-		            uni.reLaunch({
+		            uni.redirectTo({
 		                url: '/pages/mine/mine'
 		            });
 		        }
