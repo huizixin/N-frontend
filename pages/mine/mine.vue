@@ -16,7 +16,7 @@
                 <view class="user-details">
                     <text class="nickname">{{ userInfo.nickName }}</text>
                     <view class="balance-info">
-                        <text>{{ Gender[userInfo.gender] }}</text>
+                        <!-- <text>{{ Gender[userInfo.gender] }}</text> -->
                         <text class="balance">{{ userInfo.phone }}</text>
                     </view>
                 </view>
@@ -97,11 +97,12 @@
 <script>
 import {  phoneRegex } from "@/utils/regex";
 import {wxLoginApi, registerApi, sendCodeApi } from '@/api/user'
-import {Gender} from "@/utils/config.js"
+// import {Gender} from "@/utils/config.js"
+import { base64 } from "../../utils/tools";
 export default {
     data() {
         return {
-			Gender,
+			// Gender,
             isLoggedIn: false,
             platform: 'wx', // 'wx' 或 'tt'
 			
@@ -154,20 +155,20 @@ export default {
         },
 		
 		async wxLogin (){
-			// const { code } = await uni.login()
-			// wxLoginApi({code}).then(res=>{
-			// 	if(res.code === 200){
-			// 		if(res.data.userInfo?.phone){
-			// 			uni.showToast({
-			// 			  title: '登录成功',
-			// 			  icon: 'success'
-			// 			})
-			// 			this.loginSuccess(res.data);
-			// 		}else{
+			const { code } = await uni.login()
+			wxLoginApi({code}).then(res=>{
+				if(res.statusCode === 200){
+					if(res.data?.userInfo?.phone){
+						uni.showToast({
+						  title: '登录成功',
+						  icon: 'success'
+						})
+						this.loginSuccess(res.data);
+					}else{
 						this.showRegisterShow=true;
-			// 	   }
-			// 	}
-			// })
+				   }
+				}
+			})
 		},
 
         getUserInfo(){
@@ -176,9 +177,11 @@ export default {
 
         onChooseAvatar(e){
 			  const {avatarUrl} = e.detail;
-			  this.userInfo.avatarUrl = avatarUrl;
+			  base64(avatarUrl, 'jpeg').then(res=>{
+				  this.userInfo.avatarUrl  = res;
+				})
         },
-
+		
 
         async sendVerificationCode() {
                 if (!this.userInfo.phone) {
@@ -258,13 +261,14 @@ export default {
               icon: 'none'
             });
           }
+		  
             const data = {
                 ...this.userInfo,
                 code: this.verificationCode,
                 uuid:this.uuid
             }
             registerApi(data).then(res=>{
-                if(res.success){
+                if(res.statusCode === 200){
                     this.showRegisterShow = false;
                     uni.showToast({
                         title: '绑定成功',

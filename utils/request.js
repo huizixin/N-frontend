@@ -16,9 +16,10 @@ const request = (options = {}) => {
                 ...options.header
             },
             success: (res) => {
-                if (res.statusCode === 200) {
+				console.log("res", res);
+                if (res.data.statusCode === 200) {
                     resolve(res.data)
-                } else if (res.statusCode === 401) {
+                } else if (res.data.statusCode === 401) {
                     // token过期或无效
                     auth.logout()
                     uni.showToast({
